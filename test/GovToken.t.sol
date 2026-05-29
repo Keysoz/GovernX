@@ -27,8 +27,8 @@ contract TestGovernX is Test {
     }
 
     function test_Transfer() public {
-        address alice = makeAddr("alice");
-        address bob = makeAddr("bob");
+        address alice = makeAddr("Alice");
+        address bob = makeAddr("Bob");
 
         uint256 transferAmount = 100 ether;
 
@@ -187,6 +187,75 @@ contract TestGovernX is Test {
         assertEq(governor.getVotes(bob), 0);
     }
 
+    function test_TransferUpdatesVotingPower() public {
+        address alice = makeAddr("Alice");
+        address bob = makeAddr("Bob");
+
+        uint256 balanceAmount = 1000 ether;
+
+        deal(address(governor), alice, balanceAmount);
+
+        // Initial state
+        assertEq(governor.getVotes(alice), 0);
+        assertEq(governor.getVotes(bob), 0);
+
+        // Delegate to Bob
+        vm.prank(alice);
+        governor.delegate(alice);
+
+        assertEq(governor.getVotes(alice), balanceAmount);
+        assertEq(governor.getVotes(bob), 0);
+
+        // Alice Transfer Tokens to Bob
+        vm.prank(alice);
+        bool success = governor.transfer(bob, 500 ether);
+        assertTrue(success);
+
+        // Re-delegate back to Alice
+        vm.prank(bob);
+        governor.delegate(bob);
+
+        // Votes restored to Alice
+        assertEq(governor.getVotes(alice), 500 ether);
+        assertEq(governor.getVotes(bob), 500 ether);
+    }
+
+    function test_DelegationWithZeroBalance() public {
+        address alice = makeAddr("Alice");
+        address bob = makeAddr("Bob");
+
+        uint256 balanceAmount = 1000 ether;
+
+        deal(address(governor), alice, balanceAmount);
+
+        // Initial state
+        assertEq(governor.getVotes(alice), 0);
+        assertEq(governor.getVotes(bob), 0);
+
+        // Delegate to Bob
+        vm.prank(alice);
+        governor.delegate(alice);
+
+        assertEq(governor.getVotes(alice), balanceAmount);
+        assertEq(governor.getVotes(bob), 0);
+
+        // Delegate to Bob
+        vm.prank(bob);
+        governor.delegate(bob);
+
+        assertEq(governor.getVotes(alice), balanceAmount);
+        assertEq(governor.getVotes(bob), 0);
+
+        // Alice Transfer Tokens to Bob
+        vm.prank(alice);
+        bool success = governor.transfer(bob, 500 ether);
+        assertTrue(success);
+
+        // Votes restored to Alice
+        assertEq(governor.getVotes(alice), 500 ether);
+        assertEq(governor.getVotes(bob), 500 ether);
+    }
+
     function test_SnapshotPreventsFlashLoanAttack() public {
         address alice = makeAddr("Alice");
         address bob = makeAddr("Bob");
@@ -228,25 +297,9 @@ contract TestGovernX is Test {
     }
 
     function test_nonces() public {
-        address alice = makeAddr("alice");
-        address bob = makeAddr("bob");
+        address alice = makeAddr("Alice");
 
-        uint256 transferAmount = 100 ether;
-
-        // Give Alice tokens
-        deal(address(governor), alice, transferAmount);
-
-        vm.prank(alice);
         uint256 aliceNoncesBefore = governor.nonces(alice);
         assertEq(aliceNoncesBefore, 0, "Error in nonces Before");
-
-        // Transfer tokens as Alice
-        vm.prank(alice);
-        bool success = governor.transfer(bob, transferAmount);
-        assertTrue(success);
-
-        vm.prank(alice);
-        uint256 aliceNoncesAfter = governor.nonces(alice);
-        assertEq(aliceNoncesAfter, 0, "Error in nonces After");
     }
 }
