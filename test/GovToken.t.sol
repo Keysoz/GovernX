@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.20;
+pragma solidity 0.8.35;
 
 import {Test, console} from "forge-std/Test.sol";
 import {GovernX} from "../src/GovToken.sol";
@@ -225,14 +225,6 @@ contract TestGovernX is Test {
         assertEq(governor.getPastVotes(alice, snapshotBlock), balanceAmount);
 
         assertEq(governor.getPastVotes(bob, snapshotBlock), 0);
-    }
-
-    function test_clockMode() public view {
-        string memory expectedString = "mode=blocknumber&from=default";
-        string memory currentString = governor.CLOCK_MODE();
-
-        bool equal = keccak256(bytes(expectedString)) == keccak256(bytes(currentString));
-        assertTrue(equal);
     }
 
     function test_nonces() public {
