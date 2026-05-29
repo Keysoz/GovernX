@@ -7,8 +7,8 @@ import {console} from "forge-std/console.sol";
 
 contract DeployGovernX is Script {
     function run() external returns (GovernX) {
-        string name = "Governor X Token";
-        string symbol = "GVX";
+        string memory name = "Governor X Token";
+        string memory symbol = "GVX";
         GovernX governor;
 
         vm.startBroadcast();
