@@ -45,17 +45,9 @@ contract TestGovernX is Test {
         assertTrue(success);
 
         // Verify balances updated correctly
-        assertEq(
-            governor.balanceOf(alice),
-            aliceBalanceBefore - transferAmount,
-            "alice balance incorrect"
-        );
+        assertEq(governor.balanceOf(alice), aliceBalanceBefore - transferAmount, "alice balance incorrect");
 
-        assertEq(
-            governor.balanceOf(bob),
-            bobBalanceBefore + transferAmount,
-            "bob balance incorrect"
-        );
+        assertEq(governor.balanceOf(bob), bobBalanceBefore + transferAmount, "bob balance incorrect");
     }
 
     function test_TransferRevertsIfInsufficientBalance() public {
@@ -92,24 +84,12 @@ contract TestGovernX is Test {
         assertTrue(success);
 
         // Verify balances updated correctly
-        assertEq(
-            governor.balanceOf(alice),
-            balance - allowedBalance,
-            "Incorrect Balance Of Alice"
-        );
+        assertEq(governor.balanceOf(alice), balance - allowedBalance, "Incorrect Balance Of Alice");
 
-        assertEq(
-            governor.balanceOf(bob),
-            allowedBalance,
-            "Incorrect Balance of Bob"
-        );
+        assertEq(governor.balanceOf(bob), allowedBalance, "Incorrect Balance of Bob");
 
         // Verify allowance was consumed
-        assertEq(
-            governor.allowance(alice, bob),
-            0,
-            "Allowance was not decremented correctly"
-        );
+        assertEq(governor.allowance(alice, bob), 0, "Allowance was not decremented correctly");
     }
 
     // =========================
@@ -145,11 +125,7 @@ contract TestGovernX is Test {
         governor.delegate(alice);
 
         // Votes should equal token balance
-        assertEq(
-            governor.getVotes(alice),
-            balanceAmount,
-            "Error in Delegation"
-        );
+        assertEq(governor.getVotes(alice), balanceAmount, "Error in Delegation");
     }
 
     function test_DelegateToOther() public {
@@ -249,5 +225,36 @@ contract TestGovernX is Test {
         assertEq(governor.getPastVotes(alice, snapshotBlock), balanceAmount);
 
         assertEq(governor.getPastVotes(bob, snapshotBlock), 0);
+    }
+
+    function test_clockMode() public view {
+        string memory expectedString = "mode=blocknumber&from=default";
+        string memory currentString = governor.CLOCK_MODE();
+
+        bool equal = keccak256(bytes(expectedString)) == keccak256(bytes(currentString));
+        assertTrue(equal);
+    }
+
+    function test_nonces() public {
+        address alice = makeAddr("alice");
+        address bob = makeAddr("bob");
+
+        uint256 transferAmount = 100 ether;
+
+        // Give Alice tokens
+        deal(address(governor), alice, transferAmount);
+
+        vm.prank(alice);
+        uint256 aliceNoncesBefore = governor.nonces(alice);
+        assertEq(aliceNoncesBefore, 0, "Error in nonces Before");
+
+        // Transfer tokens as Alice
+        vm.prank(alice);
+        bool success = governor.transfer(bob, transferAmount);
+        assertTrue(success);
+
+        vm.prank(alice);
+        uint256 aliceNoncesAfter = governor.nonces(alice);
+        assertEq(aliceNoncesAfter, 0, "Error in nonces After");
     }
 }
