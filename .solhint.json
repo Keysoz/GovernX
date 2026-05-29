@@ -1,0 +1,16 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "func-name-mixedcase": "off",
+    "reason-string": "off",
+    "ordering": "off",
+    "max-line-length": "off",
+    "no-empty-blocks": "off",
+    "no-console": "off",
+    "avoid-low-level-calls": "off",
+    "no-inline-assembly": "off",
+    "var-name-mixedcase": "off",
+    "quotes": "off",
+    "compiler-version": "off"
+  }
+}
